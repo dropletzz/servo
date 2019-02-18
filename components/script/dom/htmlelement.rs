@@ -459,7 +459,7 @@ impl HTMLElementMethods for HTMLElement {
         let element = self.upcast::<Element>();
 
         // Step 1.
-        let element_not_rendered = !node.is_in_doc() || !element.has_css_layout_box();
+        let element_not_rendered = !node.is_connected() || !element.has_css_layout_box();
         if element_not_rendered {
             return node.GetTextContent().unwrap();
         }
@@ -707,7 +707,7 @@ impl HTMLElement {
         let root_element = element.root_element();
         let root_node = root_element.upcast::<Node>();
         let children = root_node
-            .traverse_preorder()
+            .traverse_preorder(/* shadow including */ false)
             .filter_map(DomRoot::downcast::<Element>)
             .filter(|elem| elem.is::<HTMLLabelElement>())
             .filter(|elem| elem.get_string_attribute(&local_name!("for")) == id)

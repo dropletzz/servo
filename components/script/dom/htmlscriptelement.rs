@@ -373,7 +373,7 @@ impl HTMLScriptElement {
         }
 
         // Step 5.
-        if !self.upcast::<Node>().is_in_doc() {
+        if !self.upcast::<Node>().is_connected() {
             return;
         }
 
@@ -753,7 +753,7 @@ impl VirtualMethods for HTMLScriptElement {
         match *attr.local_name() {
             local_name!("src") => {
                 if let AttributeMutation::Set(_) = mutation {
-                    if !self.parser_inserted.get() && self.upcast::<Node>().is_in_doc() {
+                    if !self.parser_inserted.get() && self.upcast::<Node>().is_connected() {
                         self.prepare();
                     }
                 }
@@ -766,17 +766,17 @@ impl VirtualMethods for HTMLScriptElement {
         if let Some(ref s) = self.super_type() {
             s.children_changed(mutation);
         }
-        if !self.parser_inserted.get() && self.upcast::<Node>().is_in_doc() {
+        if !self.parser_inserted.get() && self.upcast::<Node>().is_connected() {
             self.prepare();
         }
     }
 
-    fn bind_to_tree(&self, tree_in_doc: bool) {
+    fn bind_to_tree(&self, is_connected: bool) {
         if let Some(ref s) = self.super_type() {
-            s.bind_to_tree(tree_in_doc);
+            s.bind_to_tree(is_connected);
         }
 
-        if tree_in_doc && !self.parser_inserted.get() {
+        if is_connected && !self.parser_inserted.get() {
             let script = Trusted::new(self);
             document_from_node(self).add_delayed_task(task!(ScriptDelayedInitialize: move || {
                 script.root().prepare();

@@ -27,7 +27,7 @@ pub struct DocumentFragment {
 
 impl DocumentFragment {
     /// Creates a new DocumentFragment.
-    fn new_inherited(document: &Document) -> DocumentFragment {
+    pub fn new_inherited(document: &Document) -> DocumentFragment {
         DocumentFragment {
             node: Node::new_inherited(document),
         }
@@ -59,7 +59,7 @@ impl DocumentFragmentMethods for DocumentFragment {
     fn GetElementById(&self, id: DOMString) -> Option<DomRoot<Element>> {
         let node = self.upcast::<Node>();
         let id = Atom::from(id);
-        node.traverse_preorder()
+        node.traverse_preorder(/* shadow including */ false)
             .filter_map(DomRoot::downcast::<Element>)
             .find(
                 |descendant| match descendant.get_attribute(&ns!(), &local_name!("id")) {
